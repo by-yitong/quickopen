@@ -1,0 +1,122 @@
+/* Hallmark · macrostructure: Workbench list (app-frame) · tone: utilitarian-dark · anchor hue: 250 (cyan-blue)
+ * theme: studied-DNA (source: image) · tokens from design.md — 全站颜色只允许引用这里的 token
+ * motion: transform/opacity only · prefers-reduced-motion 退化为 opacity
+ */
+
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Inter";
+  src: url("/Inter-Medium.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-paper: #0b0c0f;
+  --color-surface: #16171d;
+  --color-surface-2: #1e2027;
+  --color-line: rgba(255, 255, 255, 0.07);
+  --color-accent: #3e8eff;
+  --color-accent-dim: rgba(62, 142, 255, 0.14);
+  --color-danger: #ff5d5d;
+  --color-ink: #f2f3f5;
+  --color-ink-2: #9ba0aa;
+  --color-ink-3: #676c75;
+
+  --font-sans: "Inter", system-ui, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-card: 24px;
+  --radius-pill: 999px;
+  --radius-input: 14px;
+
+  --dur-fast: 140ms;
+  --dur-view: 200ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    height: 100%;
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-dim);
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+/* ---- 动效:全部只用 opacity / transform ---- */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.anim-fade {
+  animation: fade-in var(--dur-view) var(--ease-out) backwards;
+}
+
+.anim-enter {
+  animation: fade-up 160ms var(--ease-out) backwards;
+}
+
+.anim-view {
+  animation: fade-up var(--dur-view) var(--ease-out) backwards;
+}
+
+.anim-pop {
+  animation: fade-up var(--dur-view) var(--ease-out) backwards;
+}
+
+.anim-toast {
+  animation: toast-in var(--dur-view) var(--ease-out) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade,
+  .anim-enter,
+  .anim-view,
+  .anim-pop,
+  .anim-toast {
+    animation-name: fade-in;
+    animation-duration: 150ms;
+  }
+}
