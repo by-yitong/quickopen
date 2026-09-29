@@ -184,9 +184,11 @@ interface ConfirmDialogProps {
   confirmLabel: string;
   onClose: () => void;
   onConfirm: () => Promise<void>;
+  /** 正文与按钮之间的附加内容(如勾选项)。 */
+  children?: ReactNode;
 }
 
-export function ConfirmDialog({ title, body, confirmLabel, onClose, onConfirm }: ConfirmDialogProps) {
+export function ConfirmDialog({ title, body, confirmLabel, onClose, onConfirm, children }: ConfirmDialogProps) {
   const [busy, setBusy] = useState(false);
 
   const handleConfirm = useCallback(() => {
@@ -200,6 +202,7 @@ export function ConfirmDialog({ title, body, confirmLabel, onClose, onConfirm }:
   return (
     <Modal title={title} onClose={onClose}>
       <p className="text-[13px] leading-relaxed text-ink-2">{body}</p>
+      {children ?? null}
       <div className="mt-5 flex justify-end gap-2">
         <Button onClick={onClose}>取消</Button>
         <Button variant="danger" loading={busy} onClick={handleConfirm}>

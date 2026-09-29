@@ -101,21 +101,51 @@ func (s *ProjectService) UpdateProject(project Project) (Project, error) {
 	return *stored, nil
 }
 
-// DeleteProject 按 ID 删除。
-func (s *ProjectService) DeleteProject(id string) error {
+// DeleteProject 删除项目;deleteFiles 为 true 时同时删除磁盘上的项目目录。
+// 护栏:根目录与用户主目录绝不删除;磁盘删除失败时报错并保留列表项。
+func (s *ProjectService) DeleteProject(id string, deleteFiles bool) error {
 	storeMu.Lock()
 	defer storeMu.Unlock()
 	ps, err := loadProjects()
 	if err != nil {
 		return err
 	}
+	idx := -1
 	for i, p := range ps {
 		if p.ID == id {
-			ps = append(ps[:i], ps[i+1:]...)
-			return saveProjects(ps)
+			idx = i
+			break
 		}
 	}
-	return fmt.Errorf("项目不存在: %s", id)
+	if idx < 0 {
+		return fmt.Errorf("项目不存在: %s", id)
+	}
+	if deleteFiles {
+		if err := guardRemove(ps[idx].Path); err != nil {
+			return err
+		}
+		if err := os.RemoveAll(ps[idx].Path); err != nil {
+			return fmt.Errorf("删除目录失败: %w", err)
+		}
+	}
+	ps = append(ps[:idx], ps[idx+1:]...)
+	return saveProjects(ps)
+}
+
+// guardRemove 高危目录护栏。
+func guardRemove(path string) error {
+	home, _ := userHomeDir()
+	abs, err := absClean(path)
+	if err != nil {
+		return err
+	}
+	if abs == string(os.PathSeparator) {
+		return fmt.Errorf("拒绝删除根目录")
+	}
+	if home != "" && abs == home {
+		return fmt.Errorf("拒绝删除用户主目录: %s", abs)
+	}
+	return nil
 }
 
 // OpenProject 用编辑器或终端打开项目;成功才更新 LastOpenedAt/OpenCount。

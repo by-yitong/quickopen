@@ -120,11 +120,11 @@ export default function App() {
   );
 
   const deleteProject = useCallback(
-    (id: string) =>
-      DeleteProject(id).then(
+    (id: string, deleteFiles: boolean) =>
+      DeleteProject(id, deleteFiles).then(
         () => {
           setProjects((prev) => prev.filter((p) => p.id !== id));
-          pushToast("success", "已删除");
+          pushToast("success", deleteFiles ? "已删除(含磁盘文件)" : "已删除");
         },
         (err: unknown) => {
           pushToast("error", errMsg(err));

@@ -36,10 +36,11 @@ export function CreateTempProject(name: string, note: string): $CancellablePromi
 }
 
 /**
- * DeleteProject 按 ID 删除。
+ * DeleteProject 删除项目;deleteFiles 为 true 时同时删除磁盘上的项目目录。
+ * 护栏:根目录与用户主目录绝不删除;磁盘删除失败时报错并保留列表项。
  */
-export function DeleteProject(id: string): $CancellablePromise<void> {
-    return $Call.ByID(1959829424, id);
+export function DeleteProject(id: string, deleteFiles: boolean): $CancellablePromise<void> {
+    return $Call.ByID(1959829424, id, deleteFiles);
 }
 
 /**

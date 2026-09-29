@@ -53,7 +53,7 @@ interface Settings {
 | `ListProjects()` | 无 | `Project[]`(按创建顺序) | 存储读写失败 |
 | `AddProject(path, name, note)` | path 必须是已存在目录;name 空→取 basename | `Project` | `目录不存在: <abs>`、`该项目已在列表中`、`路径不能为空` |
 | `UpdateProject(project)` | 按 ID 更新 Name/Note/Path(空字段沿用旧值,ID/统计字段不变) | `Project` | `项目不存在: <id>`、`该项目已在列表中` |
-| `DeleteProject(id)` | 项目 ID | `void` | `项目不存在: <id>` |
+| `DeleteProject(id, deleteFiles)` | deleteFiles=true 时同时删除磁盘项目目录(**根目录/用户主目录被护栏拒绝**;磁盘删除失败报错并保留列表项) | `void` | `项目不存在: <id>`、`拒绝删除根目录`、`拒绝删除用户主目录: <path>`、`删除目录失败: …` |
 | `OpenProject(id, editorID)` | editorID 为空用默认编辑器;成功启动才更新 lastOpenedAt/openCount;**kind=cli 时打开默认终端到项目目录并在其中执行该命令(默认无参数,codex/claude/grok 等 CLI 以 cwd 为工作目录)** | `void` | `项目不存在: <id>`、`目录不存在: <path>`、`未找到可用编辑器,请先在设置中扫描或添加`、`编辑器不存在: <id>`、`未找到可用终端,请在设置中扫描或添加` |
 | `CreateProject(name, note, parentPath)` | mkdirAll parent/name;parentPath 空→Settings.defaultPath | `Project` | `名称不能为空`、`名称不能包含路径分隔符`、`未设置默认目录,请先在设置中配置默认路径`、`该项目已在列表中`、`目标目录已存在: <path>` |
 | `CreateTempProject(name, note)` | name 空→自动生成 `tmp-YYYYMMDD-HHMMSS`(碰撞追加 `-2`/`-3`…);给了 name 则不允许路径分隔符、已存在报错;在 `<defaultPath>/tmp` 下,IsTemp=true,绝不自动删除 | `Project` | `未设置默认目录,请先在设置中配置默认路径`、`名称不能包含路径分隔符`、`目标目录已存在: <path>` |

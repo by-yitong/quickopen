@@ -108,10 +108,10 @@ func TestUpdateAndDeleteProject(t *testing.T) {
 		t.Fatalf("错误消息不符: %v", err)
 	}
 
-	if err := s.DeleteProject(p.ID); err != nil {
+	if err := s.DeleteProject(p.ID, false); err != nil {
 		t.Fatalf("DeleteProject: %v", err)
 	}
-	if err := s.DeleteProject(p.ID); err == nil || !strings.Contains(err.Error(), "项目不存在") {
+	if err := s.DeleteProject(p.ID, false); err == nil || !strings.Contains(err.Error(), "项目不存在") {
 		t.Fatalf("重复删除应报项目不存在: %v", err)
 	}
 }
@@ -461,5 +461,59 @@ func TestOpenProjectDirGone(t *testing.T) {
 	err = s.OpenProject(p.ID, "")
 	if err == nil || !strings.Contains(err.Error(), "目录不存在") {
 		t.Fatalf("期望目录不存在,得到 %v", err)
+	}
+}
+
+func TestDeleteProjectWithFiles(t *testing.T) {
+	root := withTempConfig(t)
+	s := &ProjectService{}
+	dir := filepath.Join(root, "proj-with-files")
+	if err := os.MkdirAll(filepath.Join(dir, "inner"), 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	p, err := s.AddProject(dir, "", "")
+	if err != nil {
+		t.Fatalf("AddProject: %v", err)
+	}
+
+	// 不勾选:仅移出列表,磁盘保留
+	if err := s.DeleteProject(p.ID, false); err != nil {
+		t.Fatalf("DeleteProject(false): %v", err)
+	}
+	if !fileExists(dir) {
+		t.Fatalf("不勾选时目录应保留")
+	}
+
+	// 再登记,勾选:磁盘目录连同内容一起删除
+	p2, err := s.AddProject(dir, "", "")
+	if err != nil {
+		t.Fatalf("AddProject 再次登记: %v", err)
+	}
+	if err := s.DeleteProject(p2.ID, true); err != nil {
+		t.Fatalf("DeleteProject(true): %v", err)
+	}
+	if fileExists(dir) {
+		t.Fatalf("勾选后目录应被删除")
+	}
+	ps, _ := loadProjects()
+	if len(ps) != 0 {
+		t.Fatalf("列表应为空: %+v", ps)
+	}
+
+	// 护栏:根目录与主目录拒绝删除,且列表项保留
+	home, _ := userHomeDir()
+	p3, err := s.AddProject(home, "", "")
+	if err != nil {
+		t.Fatalf("AddProject(home): %v", err)
+	}
+	if err := s.DeleteProject(p3.ID, true); err == nil || !strings.Contains(err.Error(), "拒绝删除") {
+		t.Fatalf("主目录应被护栏拦截: %v", err)
+	}
+	if err := guardRemove("/"); err == nil {
+		t.Fatalf("根目录应被护栏拦截")
+	}
+	ps, _ = loadProjects()
+	if len(ps) != 1 || ps[0].ID != p3.ID {
+		t.Fatalf("护栏拦截后列表项应保留: %+v", ps)
 	}
 }

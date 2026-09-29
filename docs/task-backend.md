@@ -54,7 +54,7 @@ type ProjectService struct{}
 func (s *ProjectService) ListProjects() ([]Project, error)
 func (s *ProjectService) AddProject(path, name, note string) (Project, error) // 登记已存在目录;name 为空取 basename
 func (s *ProjectService) UpdateProject(project Project) (Project, error)      // 按 ID 全量更新
-func (s *ProjectService) DeleteProject(id string) error
+func (s *ProjectService) DeleteProject(id string, deleteFiles bool) error // 【2026-09-29 主 agent 增补:deleteFiles=true 同时删除磁盘目录,根目录/主目录护栏,失败保留列表项】
 func (s *ProjectService) OpenProject(id, editorID string) error               // editorID=="" 用默认编辑器;成功才更新 LastOpenedAt/OpenCount
 func (s *ProjectService) CreateProject(name, note, parentPath string) (Project, error) // mkdirAll parent/name;已存在报错;parentPath=="" 用 Settings.DefaultPath
 func (s *ProjectService) CreateTempProject(name, note string) (Project, error)  // parent=DefaultPath/tmp;name 空则自动生成;给了 name 则非法字符/已存在报错【2026-09-28 主 agent 修订:加 name 参数,支持自定义临时目录名】

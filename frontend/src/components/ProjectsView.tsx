@@ -25,7 +25,7 @@ interface ProjectsViewProps {
   onOpenWith: (projectId: string, editorId: string) => void;
   onOpenDefault: (projectId: string) => void;
   onUpdateProject: (project: Project) => Promise<void>;
-  onDeleteProject: (id: string) => Promise<void>;
+  onDeleteProject: (id: string, deleteFiles: boolean) => Promise<void>;
 }
 
 type Filter = "all" | "temp";
@@ -47,6 +47,7 @@ export function ProjectsView({
   const deferredQuery = useDeferredValue(query);
   const [editing, setEditing] = useState<Project | null>(null);
   const [deleting, setDeleting] = useState<Project | null>(null);
+  const [deleteFiles, setDeleteFiles] = useState(false);
 
   const launchers = useMemo(
     () => editors.filter((e) => e.enabled && (e.kind === "editor" || e.kind === "cli")),
@@ -75,7 +76,10 @@ export function ProjectsView({
   const closeEdit = useCallback(() => setEditing(null), []);
   const closeDelete = useCallback(() => setDeleting(null), []);
   const handleEdit = useCallback((p: Project) => setEditing(p), []);
-  const handleDelete = useCallback((p: Project) => setDeleting(p), []);
+  const handleDelete = useCallback((p: Project) => {
+    setDeleteFiles(false); // 每次打开删除弹窗,「删除项目文件」默认不勾选
+    setDeleting(p);
+  }, []);
 
   const handleCopy = useCallback(
     (p: Project) => {
@@ -89,8 +93,8 @@ export function ProjectsView({
 
   const confirmDelete = useCallback(() => {
     if (!deleting) return Promise.resolve();
-    return onDeleteProject(deleting.id);
-  }, [deleting, onDeleteProject]);
+    return onDeleteProject(deleting.id, deleteFiles);
+  }, [deleting, deleteFiles, onDeleteProject]);
 
   const isEmpty = projects.length === 0;
   const noMatch = visible.length === 0;
@@ -154,11 +158,26 @@ export function ProjectsView({
       {deleting ? (
         <ConfirmDialog
           title={"删除 " + deleting.name}
-          body="删除后列表不再显示,磁盘目录不受影响"
+          body="删除后不再出现在列表中,目录本身默认保留。"
           confirmLabel="删除"
           onClose={closeDelete}
           onConfirm={confirmDelete}
-        />
+        >
+          <label
+            htmlFor="delete-files"
+            className="mt-3 flex cursor-pointer items-center gap-2 text-[13px] text-ink-2"
+          >
+            <input
+              id="delete-files"
+              type="checkbox"
+              checked={deleteFiles}
+              onChange={(e) => setDeleteFiles(e.target.checked)}
+              className="size-4 shrink-0 accent-[var(--color-accent)]"
+            />
+            同时删除磁盘上的项目文件
+            {deleteFiles ? <span className="text-danger">(不可恢复)</span> : null}
+          </label>
+        </ConfirmDialog>
       ) : null}
     </div>
   );
