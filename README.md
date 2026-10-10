@@ -1,59 +1,60 @@
-# Welcome to Your New Wails3 Project!
+# QuickOpen · 项目快开
 
-Congratulations on generating your Wails3 application! This README will guide you through the next steps to get your project up and running.
+一个跨平台桌面小工具：把常用项目收进列表，一键用你喜欢的编辑器或终端打开。基于 [Wails v3](https://v3.wails.io/)（Go + React）构建，支持 Windows / macOS / Linux。
 
-## Getting Started
+## 功能
 
-1. Navigate to your project directory in the terminal.
+- **项目管理**：手动添加项目，或扫描目录自动发现项目；支持备注、临时项目标记、打开次数与最近打开时间统计。
+- **编辑器/终端自动发现**：扫描 PATH 自动识别已安装的工具——VS Code、Cursor、Zed、Windsurf、Trae、JetBrains 全家桶（IDEA / GoLand / PyCharm…）、Sublime、Vim / Neovim、Helix、Emacs 等，以及各平台常见终端。
+- **一键启动**：点击项目即用默认编辑器打开；每个项目可快速切换编辑器或终端启动，超过 6 个收进「+N」弹层。
+- **CLI 编码工具**：支持 codex / claude / grok 等 CLI 工具，在终端中直接进入项目目录执行。
+- **自定义命令**：手动添加任意编辑器/终端，参数模板支持 `{path}` 占位符。
+- **设置**：默认项目目录、默认编辑器、默认终端；配置数据存放在系统标准目录（XDG）。
 
-2. To run your application in development mode, use the following command:
+## 安装
 
-   ```
-   wails3 dev
-   ```
+### Windows
 
-   This will start your application and enable hot-reloading for both frontend and backend changes.
+从源码构建 NSIS 安装包（需要 [Go](https://go.dev/) 1.25+、[Node.js](https://nodejs.org/)、[NSIS](https://nsis.sourceforge.io/)、[wails3 CLI](https://v3.wails.io/getting-started/installation/)）：
 
-3. To build your application for production, use:
+```bash
+wails3 task build                      # 构建 bin/quickopen.exe
+wails3 task package INSTALL_SCOPE=user # 打包用户级 NSIS 安装包（免管理员）
+```
 
-   ```
-   wails3 build
-   ```
+安装包输出在 `bin/quickopen-amd64-installer.exe`，支持静默安装：`installer.exe /S /D=<目录>`。也可以直接运行 `bin/quickopen.exe`（绿色版）。
 
-   This will create a production-ready executable in the `build` directory.
+### 其他平台
 
-## Exploring Wails3 Features
+```bash
+wails3 task build        # 当前平台
+wails3 task build GOOS=darwin   # 交叉编译（见 Taskfile.yml 各平台任务）
+```
 
-Now that you have your project set up, it's time to explore the features that Wails3 offers:
+> 依赖 WebView2（Windows 10/11 一般自带）、WKWebView（macOS）或 WebKitGTK（Linux）。
 
-1. **Check out the examples**: The best way to learn is by example. Visit the `examples` directory in the `v3/examples` directory to see various sample applications.
+## 开发
 
-2. **Run an example**: To run any of the examples, navigate to the example's directory and use:
+```bash
+wails3 dev      # 开发模式，前后端热重载
+go test ./...   # 后端测试
+```
 
-   ```
-   go run .
-   ```
+项目结构：
 
-   Note: Some examples may be under development during the alpha phase.
+```
+├── main.go / bootstrap.go   # 应用入口与首次启动初始化
+├── project_service.go       # 项目增删改查、目录扫描
+├── editor_service.go        # 编辑器/终端发现与管理
+├── scanner.go               # PATH 扫描（编辑器/终端/CLI）
+├── launcher.go              # 进程启动（编辑器/终端包装）
+├── settings_service.go      # 应用设置
+├── storage.go               # 配置持久化（XDG 目录）
+└── frontend/                # React + TypeScript + Tailwind v4 前端
+```
 
-3. **Explore the documentation**: Visit the [Wails3 documentation](https://v3.wails.io/) for in-depth guides and API references.
+## 技术栈
 
-4. **Join the community**: Have questions or want to share your progress? Join the [Wails Discord](https://discord.gg/JDdSxwjhGf) or visit the [Wails discussions on GitHub](https://github.com/wailsapp/wails/discussions).
-
-## Project Structure
-
-Take a moment to familiarize yourself with your project structure:
-
-- `frontend/`: Contains your frontend code (HTML, CSS, JavaScript/TypeScript)
-- `main.go`: The entry point of your Go backend
-- `app.go`: Define your application structure and methods here
-- `wails.json`: Configuration file for your Wails project
-
-## Next Steps
-
-1. Modify the frontend in the `frontend/` directory to create your desired UI.
-2. Add backend functionality in `main.go`.
-3. Use `wails3 dev` to see your changes in real-time.
-4. When ready, build your application with `wails3 build`.
-
-Happy coding with Wails3! If you encounter any issues or have questions, don't hesitate to consult the documentation or reach out to the Wails community.
+- **后端**：Go · Wails v3
+- **前端**：React 18 · TypeScript · Vite · Tailwind CSS v4
+- **打包**：NSIS（Windows）

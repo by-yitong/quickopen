@@ -5,11 +5,11 @@
 	"info": {
 		"0000": {
 			"ProductVersion": "0.1.0",
-			"CompanyName": "My Company",
-			"FileDescription": "A quickopen application",
-			"LegalCopyright": "© 2026, My Company",
-			"ProductName": "My Product",
-			"Comments": "This is a comment"
+			"CompanyName": "by-yitong",
+			"FileDescription": "项目快开 - 一键用编辑器/终端打开项目",
+			"LegalCopyright": "© 2026 by-yitong",
+			"ProductName": "QuickOpen",
+			"Comments": "QuickOpen: launch projects with your favourite editor or terminal"
 		}
 	}
 }

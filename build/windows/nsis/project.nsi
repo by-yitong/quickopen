@@ -33,6 +33,14 @@ Unicode true
 ####
 ## Include the wails tools
 ####
+
+# Product metadata overrides (see comments above; wails_tools.nsh keeps its
+# generated defaults unless the values are defined here)
+!define INFO_COMPANYNAME    "by-yitong"
+!define INFO_PRODUCTNAME    "QuickOpen"
+!define INFO_PRODUCTVERSION "0.1.0"
+!define INFO_COPYRIGHT      "© 2026 by-yitong"
+
 !include "wails_tools.nsh"
 
 # The version information for this two must consist of 4 parts
